@@ -5,6 +5,7 @@
   imageLoader.addEventListener('change', handleImage, false);
   var canvas = document.querySelector('#image');
   var ctx = canvas.getContext('2d');
+  var worker = new Worker('scripts/worker.js');
 
   function handleImage(e){
     var reader = new FileReader();
@@ -37,12 +38,18 @@
   function manipulateImage(type) {
     var a, b, g, i, imageData, j, length, pixel, r, ref;
     imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
+    //console.log('Img data to be sent:', imageData);
     toggleButtonsAbledness();
 
     // Hint! This is where you should post messages to the web worker and
     // receive messages from the web worker.
 
+    performance.clearMarks();
+    performance.clearMeasures();
+    performance.mark('start');
+    worker.postMessage({imageData: imageData, type: type});
+
+    /*
     length = imageData.data.length / 4;
     for (i = j = 0, ref = length; 0 <= ref ? j <= ref : j >= ref; i = 0 <= ref ? ++j : --j) {
       r = imageData.data[i * 4 + 0];
@@ -55,9 +62,19 @@
       imageData.data[i * 4 + 2] = pixel[2];
       imageData.data[i * 4 + 3] = pixel[3];
     }
+    */
+  };
+
+  worker.addEventListener('message', function(e) {
+    performance.mark('end');
+    performance.measure('exDuration', 'start', 'end');
+    var timings = performance.getEntriesByType("measure");
+    console.log('Execution time:', timings[timings.length-1].duration);
+    var imageData = e.data;
+    //console.log('Worker said: ', e.data);
     toggleButtonsAbledness();
     return ctx.putImageData(imageData, 0, 0);
-  };
+  }, false);
 
   function revertImage() {
     return ctx.putImageData(original, 0, 0);

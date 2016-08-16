@@ -1,7 +1,10 @@
- // Image manipulation logic from github.com/jwill/psychic-lana
+// Image manipulation logic from github.com/jwill/psychic-lana
 
-function manipulate(type, r, g, b, a) {
-  
+// Watch the garbage collection in devTools timeline
+// vibrant generates more GC than inverted because of the local variables.
+
+function manipulate(type) {
+
   var func = function() {};
 
   function makePixelInverted(r, g, b, a) {
@@ -59,5 +62,5 @@ function manipulate(type, r, g, b, a) {
       break;
   }
 
-  return func(r, g, b, a);
+  return func;
 }
